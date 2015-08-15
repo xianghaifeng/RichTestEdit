@@ -1,0 +1,597 @@
+<!doctype html>
+<html dir="ltr" lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE<11"/>
+    <!--<link href="../css/bootstrap.min.css" rel="stylesheet">-->
+    <style type="text/css">
+        #editor .modal{
+            position: fixed;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 0px;
+            z-index: 100;
+            background-color: #f4f2f2;
+            opacity: .5;
+            display: none;
+        }
+
+        #editor .modal-dialog{
+            position: relative;
+            width: 600px;
+        }
+
+        #editor .modal-content{
+            position: fixed;
+            top: 20%;
+            left: 30%;
+            width: 400px;
+            height: 200px;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            border-radius: 6px;
+            color: #000000;
+        }
+
+        #editor .modal-head{
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 10px;
+        }
+
+        #editor .modal-body{
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 10px;
+        }
+
+        #editor .modal-body input{
+            width: 80%;
+        }
+
+        #editor .modal-footer{
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 10px;
+        }
+
+        #editor .modal-footer-right{
+            float: right;
+            padding-right: 20px
+        }
+
+        #editor {
+            position: relative;
+            width: 800px;
+            height: 24px;
+            border: 1px solid #CCC;
+            padding: 5px;
+            overflow: visible;
+        }
+
+        #editor #toolbar {
+            position: relative;
+        }
+
+        #editor span.undo, #editor select.undo {
+            opacity: .1;
+        }
+
+        #editor span {
+            display: inline-block;
+            float: left;
+            margin: 1px 5px 1px 0px;
+            width: 22px;
+            height: 22px;
+            text-align: center;
+            background-repeat: no-repeat;
+            background-image: url("images/icons.png");
+        }
+
+        #editor span:hover {
+            background-color: #d5e1f2;
+        }
+
+        #editor span.active {
+            background-color: #d5e1f2;
+        }
+
+        #editor span.source {
+            background-position: -260px -0px;
+            opacity: 1;
+        }
+
+        #editor span.bold {
+            background-position: 0px 0px;
+        }
+
+        #editor span.italic {
+            background-position: -60px 0px;
+        }
+
+        #editor span.underline {
+            background-position: -140px 0px;
+        }
+
+        #editor span.justifyleft {
+            background-position: -460px 0px;
+        }
+
+        #editor span.justifycenter {
+            background-position: -420px 0px;
+        }
+
+        #editor span.justifyright {
+            background-position: -480px 0px;
+        }
+
+        #editor span.insertunorderedlist {
+            background-position: -20px 0px;
+        }
+
+        #editor span.insertorderedlist {
+            background-position: -80px 0px;
+        }
+
+        #editor span.removeformat {
+            background-position: -580px 0px;
+        }
+
+        #editor span.removeformat.active {
+            background-color: #ffffff;
+        }
+
+        #editor span.removeformat.active:hover {
+            background-color: #d5e1f2;
+        }
+
+        #editor span.forecolor {
+            width: 22px;
+            background-repeat: no-repeat;
+            background-position: -720px 0px;
+        }
+
+        #editor span.createlink {
+            background-position: -500px 0px;
+        }
+
+        #editor span.createlink.active {
+            background-color: #ffffff;
+        }
+
+        #editor span.createlink.active:hover {
+            background-color: #d5e1f2;
+        }
+
+        #editor select {
+            display: inline-block;
+            float: left;
+            height: 20px;
+            width: 60px;
+            margin: 1px 5px 1px 0px;
+        }
+
+        #dropdown-meau {
+            position: absolute;
+            left: 248px;
+            top: 38px;
+            /*width: 200px;*/
+            /*height: 100px;*/
+            border: 2px solid #bfbfbf;
+            display: none;
+            z-index: 10;
+        }
+
+        #dropdown-meau .dropdown-meau-caret{
+            position: absolute;
+            left: 25px;
+            top: -11px;
+            background: url(../images/caret.png) no-repeat 0 0;
+        }
+        #dropdown-meau #colorpanel table{
+            border: 0px solid #bfbfbf;
+        }
+    </style>
+    <title>富文本编辑器</title>
+</head>
+<body>
+
+<form action="#">
+    <div id="editor">
+        <div id="toolbar">
+            <span class="source no-exclusion" title="显示源码" unselectable="on" data-class="source"></span>
+            <span class="bold no-exclusion" title="加粗" unselectable="on" data-class="bold"></span>
+            <span class="italic no-exclusion" title="斜体" unselectable="on" data-class="italic"></span>
+            <span class="underline no-exclusion" title="下划" unselectable="on" data-class="underline"></span>
+            <span class="justifyleft exclusion ex-1  active" title="居左" unselectable="on"
+                  data-class="justifyleft"></span>
+            <span class="justifycenter exclusion ex-1" title="居中" unselectable="on" data-class="justifycenter"></span>
+            <span class="justifyright exclusion ex-1" title="居右" unselectable="on" data-class="justifyright"></span>
+            <span class="insertunorderedlist exclusion ex-2" title="无序" unselectable="on"
+                  data-class="insertunorderedlist"></span>
+            <span class="insertorderedlist exclusion ex-2" title="有序" unselectable="on"
+                  data-class="insertorderedlist"></span>
+            <span class="removeformat no-exclusion" title="清除格式" unselectable="on" data-class="removeformat"></span>
+            <span class="forecolor no-exclusion" title="字体颜色" unselectable="on" data-class="forecolor"></span>
+            <span class="createlink no-exclusion" title="超链接" unselectable="on" data-class="createlink"></span>
+            <select class="fontname" title="fontname" data-class="fontname">
+                <option style="font-family: 'SimSun'" value="Simsun">宋体</option>
+                <option style="font-family: 'LiSu'" value="LiSu">隶书</option>
+                <option style="font-family: 'KaiTi_GB2312'" value="KaiTi_GB2312">楷体</option>
+                <option style="font-family: 'YouYuan'" value="YouYuan">幼圆</option>
+                <option style="font-family: 'SimHei'" value="SimHei">黑体</option>
+                <option style="font-family: 'Microsoft YaHei'" value="Microsoft YaHei">雅黑</option>
+                <option style="font-family: 'Comic Sans MS'" value="Comic Sans MS">Comic Sans MS</option>
+            </select>
+            <select class="fontsize" title="fontsize" data-class="fontsize">
+                <option style="font-size: 10px;" value="1">10</option>
+                <option style="font-size: 12px;" value="2">12</option>
+                <option style="font-size: 16px;" value="3" selected="selected">16</option>
+                <option style="font-size: 18px;" value="4">18</option>
+                <option style="font-size: 24px;" value="5">24</option>
+                <option style="font-size: 32px;" value="6">32</option>
+                <option style="font-size: 48px;" value="7">48</option>
+            </select>
+        </div>
+        <div id="dropdown-meau">
+            <div class="dropdown-meau-caret" style="width: 21px; height: 11px; "></div>
+            <div id="colorpanel"></div>
+        </div>
+        <div class="modal" id="myModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content" id="modal-content">
+                    <div class="modal-head">
+                        超链接
+                    </div>
+                    <div class="modal-body">
+                        <p>地址：<input id="modal-address" class="address" type="text" value="http://"/></p>
+                        <p>标题：<input id="modal-title" class="title" type="text"/></p>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="modal-footer-right">
+                            <button type="button" class="modal-btn" data-class="cancel">取消</button>
+                            <button type="button" class="modal-btn" data-class="sure">确认</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <iframe id="iframe-edit" style="width: 800px; height: 200px; padding: 5px;border: 1px solid #CCC;"></iframe>
+    <textarea id="textarea"
+              style="width: 800px; height: 200px; padding: 5px;border: 1px solid #CCC; display: none;"></textarea>
+    <div style="width: 800px; height: 200px">
+        <button id="btn-submit" type="button">提交</button>
+    </div>
+</form>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript">
+    window.onload = function () {
+        var client = function () {
+            var engine = {
+                //呈现引擎
+                ie: 0,
+                gecko: 0,
+                webkit: 0,
+                khtml: 0,
+                opera: 0,
+
+                //具体版本
+                ver: null
+            };
+            var browser = {
+                //有些浏览器使用相同的呈现引擎，如webkit， 但是它们的js引擎却不一样
+                ie: 0,
+                firefox: 0,
+                konq: 0,
+                opera: 0,
+                chorme: 0,
+                safari: 0,
+
+                //具体版本
+                ver: null
+            };
+            var ua = window.navigator.userAgent;
+            if (window.opera) {
+                engine.ver = browser.ver = window.opera.version();
+                engine.opera = browser.ver = parseFloat(engine.ver);
+            }
+            else if (/AppleWebkit\/(\S+)/i.test(ua)) {
+                engine.ver = RegExp["$1"];
+                engine.webkit = parseFloat(engine.ver);
+
+                //确定是Chorme还是Safari
+                if (/Chrome\/(\S+)/i.test(ua)) {
+                    browser.ver = RegExp["$1"];
+                    browser.chorme = parseFloat(browser.ver);
+                }
+                else if (/Version\/(\S+)/i.test(ua)) {
+                    browser.ver = RegExp["$1"];
+                    browser.safari = parseFloat(browser.ver);
+                }
+                else {
+                    //近似确定版本号
+                    var safariVersion = 1;
+                    if (engine.webkit < 100) {
+                        safariVersion = 1;
+                    }
+                    else if (engine.webkit < 312) {
+                        safariVersion = 1.2;
+                    }
+                    else if (engine.webkit < 412) {
+                        safariVersion = 1.3;
+                    }
+                    else {
+                        safariVersion = 2;
+                    }
+                    engine.safari = browser.ver = safariVersion;
+                }
+            }
+            else if (/KHTML\/(\S+)/i.test(ua) || /Konqueror\/(\S+)/i.test(ua)) {
+                engine.ver = browser.ver = RegExp["$1"];
+                engine.khtml = browser.konq = parseFloat(engine.ver);
+            }
+            else if (/rv:([^\)]+)\) Gecko\/\d{8}/i.test(ua)) {
+                engine.ver = RegExp["$1"];
+                engine.gecko = parseFloat(engine.ver);
+
+                //确定是不是Firefox
+                if (/Firefox\/(\S+)/i.test(ua)) {
+                    browser.ver = RegExp["$1"];
+                    browser.firefox = parseFloat(engine.ver);
+                }
+            }
+            else if (/MSIE ([^;]+)/i.test(ua) || /Trident\/(\S+)/i.test(ua)) {
+                engine.ver = browser.ver = RegExp["$1"];
+                engine.ie = browser.ie = parseFloat(engine.ver);
+            }
+
+            return {
+                engine: engine,
+                browser: browser
+            };
+        }();
+        var editor = document.getElementById("editor");
+        var buttons = $("span", editor);
+        var selects = $("select", editor);
+        var n = 1;
+//***********************************************************
+        var iframe = document.getElementById("iframe-edit");
+        var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDocument.designMode = "on";
+        iframeDocument.contentEditable = "true";
+        iframeDocument.open();
+        iframeDocument.write('<html><head></head><body style="word-wrap: break-word; word-break: normal"></body></html>');
+        iframeDocument.close();
+        function createColorTable() {
+            var colordata = ['#000000', '#7f7f7f', '#00b0f0', '#ff0000', '#ffff00', '#7030a0', '#ffffff'];
+            var div = document.getElementById("colorpanel");
+            var html = [];
+            html.push('<table border=1 cellpadding= 7 >');
+            html.push('<tr>');
+            for (var i = 0; i < colordata.length; i++) {
+                html.push('<td unselectable="on" class="color" data-value="' + colordata[i] + '" style="width: 20px;height: 20px;padding: 0px;background-color :' + colordata[i] + ';"></td>');
+            }
+            html.push('</tr>');
+            html.push('</table>');
+            div.innerHTML = html.join("");
+        }
+        createColorTable();
+//***********************************************************
+        buttons.click(dealButton);
+        selects.click(dealSelection);
+        $(".color").click(dealColor);
+        iframeDocument.addEventListener("click", querySelectionState);
+        function dealButton() {
+            var jquery = $(this);
+            if (jquery.hasClass("undo")) {
+                return;
+            }
+            if (jquery.hasClass("source")) {
+                jquery.toggleClass("active");
+                dealButtonSource();
+                jquery.removeClass("undo");
+                return;
+            }
+            if (jquery.hasClass("exclusion")) {
+                switch (true) {
+                    case jquery.hasClass("ex-1"):
+                        dealButtonex1(jquery);
+                        break;
+                    case jquery.hasClass("ex-2"):
+                        dealButtonex2(jquery);
+                        break;
+                    default :
+                        break;
+                }
+                iframeDocument.execCommand(this.dataset.class);
+                return;
+            }
+            if (jquery.hasClass("forecolor")) {
+                jquery.toggleClass("active");
+                $("#dropdown-meau").toggle();
+                return;
+            }
+            if (jquery.hasClass("createlink")) {
+                //这里我们假设的是IE11以上，chrome, firefox
+                var selection = iframeDocument.getSelection();
+                var selectedText = selection.toString();
+                var range = selection.getRangeAt(0);
+                var a = iframeDocument.createElement("a");
+                $(".modal").toggle();
+                $(".modal-btn").unbind();
+                $(".modal-btn").click(function(){$(".modal").toggle();});
+                $(".modal-btn").click(insertHREF(range, a));
+                return;
+            }
+            jquery.toggleClass("active");
+            iframeDocument.execCommand(this.dataset.class, false, null);
+            return;
+        }
+        function insertHREF(range, a){
+            return function(){
+                if($(this).data("class") == "sure"){
+                    a.href = a.innerHTML = $("#modal-address").val();
+                    a.title = $("#modal-title").val();
+                    range.insertNode(a);
+                }
+            }
+        }
+        //显示源码
+        function dealButtonSource() {
+            var textarea_1 = document.getElementById("textarea");
+            textarea_1.value = iframeDocument.body.innerHTML;
+            $(textarea_1).toggle();
+            $(iframe).toggle();
+            buttons.toggleClass("undo");
+            selects.toggleClass("undo");
+            if (selects.attr("disabled") == "disabled") {
+                selects.removeAttr("disabled");
+            }
+            else {
+                selects.attr("disabled", "disabled");
+            }
+        }
+        //处理居中，居左，居右。这三种一定有一个是处于active状态
+        function dealButtonex1(obj) {
+            var arr = $(".ex-1");
+            for (var i = 0; i < arr.length; i++) {
+                $(arr[i]).removeClass("active");
+            }
+            obj.addClass("active");
+        }
+        //处理有序，无序。
+        function dealButtonex2(obj) {
+            if (obj.hasClass("active")) {
+                obj.toggleClass("active");
+            }
+            else {
+                var arr = $(".ex-2");
+                for (var i = 0; i < arr.length; i++) {
+                    $(arr[i]).removeClass("active");
+                }
+                obj.addClass("active");
+            }
+        }
+        function dealColor() {
+            var value = this.dataset.value;
+            iframeDocument.execCommand("forecolor", false, value);
+            $(".forecolor").toggleClass("active");
+            $("#dropdown-meau").toggle();
+        }
+        function dealSelection() {
+            var command = this.dataset.class;
+            var value = this.value;
+            iframeDocument.execCommand(command, false, value);
+        }
+        //检查当前选区的状态,并将相关按钮设置成相应的转态
+        function querySelectionState()
+        {
+            //这里是由于IE中不进行居左，居右，那么直接点击BOLD，不能正常的进行加粗和取消。
+            if (n == 1) {
+                iframeDocument.execCommand("justifyright", false, null);
+                iframeDocument.execCommand("justifyleft", false, null);
+                n++;
+            }
+            iframeDocument.queryCommandState("bold") ? $(".bold").addClass("active") : $(".bold").removeClass("active");
+            iframeDocument.queryCommandState("italic") ? $(".italic").addClass("active") : $(".italic").removeClass("active");
+            iframeDocument.queryCommandState("underline") ? $(".underline").addClass("active") : $(".underline").removeClass("active");
+            try {
+                iframeDocument.queryCommandState("justifyleft", false);
+            }
+            catch (ex) {
+                iframeDocument.execCommand("justifyleft", false, null);
+            }
+            if (iframeDocument.queryCommandState("justifyleft")) {
+                $(".ex-1").removeClass("active");
+                $(".justifyleft").addClass("active");
+            }
+            else if (iframeDocument.queryCommandState("justifycenter")) {
+                $(".ex-1").removeClass("active");
+                $(".justifycenter").addClass("active");
+            }
+            else if (iframeDocument.queryCommandState("justifyright")) {
+                $(".ex-1").removeClass("active")
+                $(".justifyright").addClass("active");
+            }
+            $(".ex-2").removeClass("active");
+
+            if (iframeDocument.queryCommandState("insertunorderedlist")) {
+                $(".insertunorderedlist").addClass("active");
+            }
+            else if (iframeDocument.queryCommandState("insertorderedlist")) {
+                $(".insertorderedlist").addClass("active");
+            }
+            var val = iframeDocument.queryCommandValue("fontname");  //字体类型
+//
+            var fontName = $(".fontname")[0];
+            for (var i = 0; i < fontName.length; i++) {
+                if (fontName.options[i].value == val) {
+                    break;
+                }
+            }
+            if (i < fontName.length) {
+                fontName.options[i].selected = true;
+            }
+            /*firefox 失去焦点时为空串或者是默认的为空串*/
+            if (iframeDocument.queryCommandValue("fontsize") == "") {
+                iframeDocument.execCommand("fontsize", false, 3);
+            }
+            $(".fontsize")[0].options[parseInt(iframeDocument.queryCommandValue("fontsize")) - 1].selected = true; //字体大小
+        }
+        var btnCopy = document.getElementById("btn-submit");
+        btnCopy.addEventListener("click", copy);
+        function copy() {
+            var doc = document.getElementById("myedit").contentDocument;
+            var textarea_1 = document.getElementById("textarea");
+            textarea_1.value = doc.body.innerHTML;
+            var JSONObj = {};
+            JSONObj["content"] = textarea_1.value;
+            JSONObj["time_publish"] = getDate();
+            var JSONStr = JSON.stringify(JSONObj);
+            ImpAJAXPost("../control/dealAddJoke.php", JSONStr);
+            textarea_1.style.display = "none";
+
+        };
+    }
+    function ImpAJAXPost(url, pram) {
+        var xmlHttp;
+        if (window.XMLHttpRequest) {
+            xmlHttp = new XMLHttpRequest();
+        }
+        else {
+            xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                if (xmlHttp.responseText == "true") {
+                    alert("success");
+                }
+                else if (xmlHttp.responseText == "false") {
+                    alert("failed");
+                }
+                else {
+                    alert("nothing");
+                }
+            }
+        };
+        pram = encodeURIComponent(pram);
+        xmlHttp.open("post", url, true);
+        xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xmlHttp.send("JSON=" + pram);
+
+    }
+    //这里时间是写在innerHTML.
+    function getDate() {
+        var mydate = new Date();
+        var date = mydate.getFullYear() + "-" + (mydate.getMonth() + 1) + "-" + mydate.getDate();
+        return date;
+    }
+</script>
+</body>
+</html>
